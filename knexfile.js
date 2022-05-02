@@ -13,7 +13,10 @@ module.exports = {
     connection: DATABASE_URL, // use DATABASE_URL for connection (should have ElephantSQL database instance in .env file)
     migrations: {
       directory: path.join(__dirname, "src", "db", "migrations"), // store migration files in src/db/migrations
-    }
+    },
+    seeds: {
+      directory: path.join(__dirname, "src", "db", "seeds"), // sets seed directory for poulating database with test and seed data
+    },
   },
 
 };
