@@ -1,4 +1,5 @@
 const productsService = require("./products.service")
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary")
 
 function read(req, res, next) {
   const { product: data } = res.locals
@@ -28,7 +29,28 @@ async function productExists(request, response, next) {
   }
 }
 
+async function listOutOfStockCount(request, response, next) {
+  response.json({ data: await productsService.listOutOfStockCount() })
+}
+
+async function getTotalCount(request, response, next) {
+  const { count } = await productsService.count() // don't forget that count is returned as a string
+  response.json({ data: { "count": parseInt(count) } })
+}
+
+async function listPriceSummary(request, response, next) {
+  response.json({ data: await productsService.listPriceSummary() })
+}
+
+async function listTotalWeightByProduct(request, response, next) {
+  response.json({ data: await productsService.listTotalWeightByProduct() })
+}
+
 module.exports = {
   read: [productExists, read],
   list: [list],
+  listOutOfStockCount: [asyncErrorBoundary(listOutOfStockCount)],
+  listPriceSummary: [asyncErrorBoundary(listPriceSummary)],
+  listTotalWeightByProduct: [asyncErrorBoundary(listTotalWeightByProduct)],
+  count: [asyncErrorBoundary(getTotalCount)]
 };
