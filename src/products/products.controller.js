@@ -5,24 +5,27 @@ function read(req, res, next) {
   res.json({ data });
 }
 
-function list(req, res, next) {
-  productsService
-    .list()
-    .then((data) => { res.json({ data }) })
-    .catch(next)
+async function list(request, response, next) {
+  try {
+    const data = await productsService.list()
+    response.json({ data })
+  } catch (error) {
+    next(error);
+  }
 }
 
-function productExists(req, res, next) {
-  productsService
-    .read(req.params.productId)
-    .then((product) => {
-      if (product) { // it gives an empty array when there's nothing
-        res.locals.product = product // storing to locals like usual
-        return next()
-      }
-      next({ status: 404, message: `Product cannot be found.` })
-    })
-    .catch(next)
+async function productExists(request, response, next) {
+  try {
+    console.log(typeof request.params.productId)
+    const product = await productsService.read(request.params.productId)
+    if (product) { // it gives an empty array when there's nothing
+      response.locals.product = product // storing to locals like usual
+      return next()
+    }
+    next({ status: 404, message: `Product cannot be found.` })
+  } catch (error) {
+    next(error)
+  }
 }
 
 module.exports = {
