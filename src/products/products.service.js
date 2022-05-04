@@ -1,4 +1,5 @@
 const knex = require("../db/connection");
+const mapProperties = require("../utils/map-properties");
 
 function list() {
     return knex("products").select("*");
@@ -8,10 +9,11 @@ function count() {
     return knex("products").count("product_id").first()
 }
 
-function read(productId) { // read operation
+// OLD READ OPERATION
+/*function read(productId) { // read operation
     return knex("products").select("*").where({ product_id: productId }).first();
     // don't forget to add first() to the end so it can only give you the first data point
-}
+}*/
 
 function listOutOfStockCount() {
     /**
@@ -56,11 +58,66 @@ function listTotalWeightByProduct() {
         .groupBy("product_title", "product_sku") // group every raw column that you're aggregating
 }
 
+/**
+ * Converts the average to a float
+ * REMINDER: bigInt / bigFloat data selectors retun as strings
+ */
+function convertAverage(data) {
+
+    data.forEach((item, index) => {
+        if (item["avg"])
+            data[index]["avg"] = parseFloat(data[index]["avg"])
+    })
+    return data
+}
+
+function listAverageByCategory() {
+    return knex("products as p")
+        .join("products_categories as pc", "p.product_id", "pc.product_id")
+        .join("categories as c", "pc.category_id", "c.category_id")
+        .select("c.category_name")
+        .avg("p.product_price")
+        .groupBy("c.category_name")
+        .then(convertAverage) // convert the average to a float
+}
+
+const addCategory = mapProperties({
+    category_id: "category.category_id",
+    category_name: "category.category_name",
+    category_description: "category.category_description"
+})
+const addSupplier = mapProperties({
+    supplier_id: "supplier.supplier_id"
+})
+/**
+ * NEW READ OPERATION USING JOIN
+ * Get all product information from Product, especially from multiple tables
+ */
+function read(product_id) {
+    /**
+     * SELECT p.*, c.*
+     * FROM products p
+     * JOIN products_categories pc 
+     * ON p.product_id = pc.product_id 
+     * JOIN categories c 
+     * ON pc.category_id = c.category_id 
+     */
+    return knex("products as p")
+        .join("products_categories as pc", "p.product_id", "pc.product_id")
+        .join("categories as c", "pc.category_id", "c.category_id")
+        .select("p.*", "c.*")
+        .where({ "p.product_id": product_id })
+        .first()
+        .then(addCategory)
+        .then(addSupplier)
+}
+
 module.exports = {
     list,
     read,
     listOutOfStockCount,
     listPriceSummary,
     listTotalWeightByProduct,
-    count
+    count,
+    listAverageByCategory
 };

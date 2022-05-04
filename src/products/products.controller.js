@@ -46,11 +46,17 @@ async function listTotalWeightByProduct(request, response, next) {
   response.json({ data: await productsService.listTotalWeightByProduct() })
 }
 
+async function listAverageByCategory(request, response, next) {
+  response.json({ data: await productsService.listAverageByCategory() })
+}
+
 module.exports = {
   read: [productExists, read],
   list: [list],
   listOutOfStockCount: [asyncErrorBoundary(listOutOfStockCount)],
   listPriceSummary: [asyncErrorBoundary(listPriceSummary)],
   listTotalWeightByProduct: [asyncErrorBoundary(listTotalWeightByProduct)],
-  count: [asyncErrorBoundary(getTotalCount)]
+  listAverageByCategory: [asyncErrorBoundary(listAverageByCategory)],
+  count: [asyncErrorBoundary(getTotalCount)],
+
 };

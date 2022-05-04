@@ -8,5 +8,6 @@ router.route("/out-of-stock-count").get(controller.listOutOfStockCount).all(meth
 router.route("/price-summary").get(controller.listPriceSummary).all(methodNotAllowed);
 router.route("/total-weight-by-product").get(controller.listTotalWeightByProduct).all(methodNotAllowed);
 router.route("/total").get(controller.count).all(methodNotAllowed)
+router.route("/category-average").get(controller.listAverageByCategory).all(methodNotAllowed)
 //correction: [0-9]+ with the + outside gives only digits.
 module.exports = router;
